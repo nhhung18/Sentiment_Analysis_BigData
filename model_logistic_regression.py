@@ -200,7 +200,7 @@ def main():
     # --------------------------------------------------------
     print("\n===== VISUALIZATION =====")
 
-    save_dir = "logistic_statistical_image"
+    save_dir = "logistic_statistical_img"
     os.makedirs(save_dir, exist_ok=True)
 
     # -------- Label distribution
