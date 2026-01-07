@@ -1,0 +1,48 @@
+Metadata-Version: 2.3
+Name: Spark
+Version: 0.3.2
+Summary: Spark AI Development Kit
+License: MIT
+Author: Wensheng Wang
+Author-email: wenshengwang@gmail.com
+Requires-Python: >=3.12,<4.0
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Requires-Dist: aiohttp (>=3.10.5)
+Requires-Dist: aiosqlite (>=0.21.0)
+Requires-Dist: docstring-parser (>=0.17.0)
+Requires-Dist: jinja2 (>=3.1.6)
+Requires-Dist: json-repair (>=0.52.4)
+Requires-Dist: openai (>=2.7.1)
+Requires-Dist: pydantic (>=2.7,<3.0)
+Requires-Dist: starlette (>=0.50.0)
+Requires-Dist: typing-extensions (>=4.15.0)
+Requires-Dist: uvicorn (>=0.38.0)
+Requires-Dist: websockets (>=15.0)
+Project-URL: Repository, https://github.com/wensheng/spark
+Description-Content-Type: text/markdown
+
+# Spark
+
+Spark is an Python ADK (AI Development Kit).
+
+## Get started
+
+    pip install spark
+
+## Running examples
+
+See [examples/README.md](examples/README.md) for more details.
+
+If you already installed spark with (pip install spark), you can run examples directly:
+
+    python examples/e001_hello.py
+
+If you clone the repo:
+
+```bash
+python -m examples.e001_hello
+```
+
