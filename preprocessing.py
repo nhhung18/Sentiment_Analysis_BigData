@@ -85,7 +85,7 @@ axes[1, 0].grid(axis='y', alpha=0.3)
 
 # Lưu biểu đồ trước khi làm sạch
 plt.tight_layout()
-plt.savefig("before_cleaning.png", dpi=300, bbox_inches='tight')
+plt.savefig("preprocessing_img/before_cleaning.png", dpi=300, bbox_inches='tight')
 print("\n Saved: before_cleaning.png")
 
 # 5. Định nghĩa hàm làm sạch tweet
@@ -145,7 +145,7 @@ axes2[1].legend()
 axes2[1].grid(axis='y', alpha=0.3)
 
 plt.tight_layout()
-plt.savefig("after_cleaning.png", dpi=300, bbox_inches='tight')
+plt.savefig("preprocessing_img/after_cleaning.png", dpi=300, bbox_inches='tight')
 print("\n Saved: after_cleaning.png")
 
 # In thống kê

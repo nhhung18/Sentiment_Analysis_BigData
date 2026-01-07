@@ -29,6 +29,7 @@ import argparse
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, roc_curve, auc
+import os
 
 # ------------------------------------------------------------
 # Argument parser
@@ -199,6 +200,9 @@ def main():
     # --------------------------------------------------------
     print("\n===== VISUALIZATION =====")
 
+    save_dir = "logistic_statistical_image"
+    os.makedirs(save_dir, exist_ok=True)
+
     # -------- Label distribution
     label_pdf = df.groupBy("label").count().toPandas()
 
@@ -209,7 +213,11 @@ def main():
     plt.title("Label Distribution")
 
     plt.tight_layout()
-    plt.savefig("label_distribution.png", dpi=300, bbox_inches="tight")
+    plt.savefig(
+        os.path.join(save_dir, "label_distribution.png"),
+        dpi=300,
+        bbox_inches="tight"
+    )
     plt.close()
 
     # -------- Confusion Matrix
@@ -223,7 +231,11 @@ def main():
     plt.title("Confusion Matrix")
     
     plt.tight_layout()
-    plt.savefig("confusion_matrix.png", dpi=300, bbox_inches="tight")
+    plt.savefig(
+        os.path.join(save_dir, "confusion_matrix.png"),
+        dpi=300,
+        bbox_inches="tight"
+    )
     plt.close()
 
     # -------- ROC Curve
@@ -242,7 +254,11 @@ def main():
     plt.legend()
     
     plt.tight_layout()
-    plt.savefig("roc_curve.png", dpi=300, bbox_inches="tight")
+    plt.savefig(
+        os.path.join(save_dir, "roc_curve.png"),
+        dpi=300,
+        bbox_inches="tight"
+    )
     plt.close()
 
     # --------------------------------------------------------
