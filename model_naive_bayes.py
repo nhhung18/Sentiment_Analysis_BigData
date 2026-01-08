@@ -25,6 +25,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, roc_curve, auc
 import os
+import json
+from sklearn.metrics import confusion_matrix
 
 # ------------------------------------------------------------
 # Main
@@ -108,9 +110,15 @@ def main():
     # 7. Evaluation
     # --------------------------------------------------------
     acc_eval = MulticlassClassificationEvaluator(
+    labelCol="label",
+    predictionCol="prediction",
+    metricName="accuracy"
+    )
+
+    f1_eval = MulticlassClassificationEvaluator(
         labelCol="label",
         predictionCol="prediction",
-        metricName="accuracy"
+        metricName="f1"
     )
 
     roc_eval = BinaryClassificationEvaluator(
@@ -119,12 +127,37 @@ def main():
         metricName="areaUnderROC"
     )
 
+    # ---- Metrics
     accuracy = acc_eval.evaluate(test_pred)
+    f1 = f1_eval.evaluate(test_pred)
     roc_auc = roc_eval.evaluate(test_pred)
 
-    print("\n===== TEST RESULTS =====")
+    print("\n===== TEST RESULTS (Naive Bayes) =====")
     print(f"Accuracy : {accuracy:.4f}")
+    print(f"F1-score : {f1:.4f}")
     print(f"ROC-AUC  : {roc_auc:.4f}")
+
+    # --------------------------------------------------------
+    # Save metrics
+    # --------------------------------------------------------
+    metrics_dir = "metrics"
+    os.makedirs(metrics_dir, exist_ok=True)
+
+    # ---- Confusion Matrix
+    cm_pdf = test_pred.select("label", "prediction").toPandas()
+    cm = confusion_matrix(cm_pdf["label"], cm_pdf["prediction"])
+
+    metrics = {
+        "accuracy": float(accuracy),
+        "f1": float(f1),
+        "roc_auc": float(roc_auc),
+        "confusion_matrix": cm.tolist()
+    }
+
+    with open(f"{metrics_dir}/nb_metrics.json", "w") as f:
+        json.dump(metrics, f, indent=4)
+
+
 
     # --------------------------------------------------------
     # 8. VISUALIZATION
@@ -133,16 +166,16 @@ def main():
     os.makedirs(save_dir, exist_ok=True)
 
     # -------- Label distribution
-    label_pdf = df.groupBy("label").count().toPandas()
+    # label_pdf = df.groupBy("label").count().toPandas()
 
-    plt.figure(figsize=(5, 4))
-    plt.bar(label_pdf["label"], label_pdf["count"])
-    plt.xlabel("Label (0 = Negative, 1 = Positive)")
-    plt.ylabel("Count")
-    plt.title("Label Distribution")
-    plt.tight_layout()
-    plt.savefig(os.path.join(save_dir, "label_distribution.png"), dpi=300)
-    plt.close()
+    # plt.figure(figsize=(5, 4))
+    # plt.bar(label_pdf["label"], label_pdf["count"])
+    # plt.xlabel("Label (0 = Negative, 1 = Positive)")
+    # plt.ylabel("Count")
+    # plt.title("Label Distribution")
+    # plt.tight_layout()
+    # plt.savefig(os.path.join(save_dir, "label_distribution.png"), dpi=300)
+    # plt.close()
 
     # -------- Confusion Matrix
     cm_pdf = test_pred.select("label", "prediction").toPandas()

@@ -19,7 +19,10 @@ from pyspark.ml.feature import (
     VectorAssembler
 )
 from pyspark.ml.classification import LinearSVC
-from pyspark.ml.evaluation import MulticlassClassificationEvaluator
+from pyspark.ml.evaluation import (
+    MulticlassClassificationEvaluator,
+    BinaryClassificationEvaluator
+)
 from pyspark.sql.functions import col
 
 import argparse
@@ -27,6 +30,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
 import os
+import json
+from sklearn.metrics import confusion_matrix
 
 # ------------------------------------------------------------
 # Argument parser
@@ -174,19 +179,60 @@ def main():
     # --------------------------------------------------------
     # 9. Evaluation
     # --------------------------------------------------------
-    metrics = ["accuracy", "weightedPrecision", "weightedRecall", "f1"]
-    evaluators = {
-        m: MulticlassClassificationEvaluator(
-            labelCol="label",
-            predictionCol="prediction",
-            metricName=m
-        )
-        for m in metrics
+    # Accuracy
+    acc_eval = MulticlassClassificationEvaluator(
+        labelCol="label",
+        predictionCol="prediction",
+        metricName="accuracy"
+    )
+
+    # F1-score (weighted)
+    f1_eval = MulticlassClassificationEvaluator(
+        labelCol="label",
+        predictionCol="prediction",
+        metricName="f1"
+    )
+
+    # ROC-AUC (binary classification only)
+    auc_eval = BinaryClassificationEvaluator(
+        labelCol="label",
+        rawPredictionCol="rawPrediction",
+        metricName="areaUnderROC"
+    )
+
+    # --------------------------------------------------
+    # METRIC VALUES
+    # --------------------------------------------------
+    accuracy = acc_eval.evaluate(test_pred)
+    f1 = f1_eval.evaluate(test_pred)
+    roc_auc = auc_eval.evaluate(test_pred)
+
+    print("\n===== TEST RESULTS =====")
+    print(f"Accuracy : {accuracy:.4f}")
+    print(f"F1-score : {f1:.4f}")
+    print(f"ROC-AUC  : {roc_auc:.4f}")
+
+    # --------------------------------------------------
+    # CONFUSION MATRIX
+    # --------------------------------------------------
+    cm_pdf = test_pred.select("label", "prediction").toPandas()
+    cm = confusion_matrix(cm_pdf["label"], cm_pdf["prediction"])
+
+    # --------------------------------------------------
+    # SAVE METRICS
+    # --------------------------------------------------
+    metrics_dir = "metrics"
+    os.makedirs(metrics_dir, exist_ok=True)
+
+    metrics = {
+        "accuracy": float(accuracy),
+        "f1": float(f1),
+        "roc_auc": float(roc_auc),
+        "confusion_matrix": cm.tolist()
     }
 
-    print("\n===== TEST RESULTS (SVM) =====")
-    for m, evalr in evaluators.items():
-        print(f"{m.capitalize():<20}: {evalr.evaluate(test_pred):.4f}")
+    with open(f"{metrics_dir}/svm_metrics.json", "w") as f:
+        json.dump(metrics, f, indent=4)
 
     # --------------------------------------------------------
     # 10. VISUALIZATION
@@ -197,21 +243,21 @@ def main():
     os.makedirs(save_dir, exist_ok=True)
 
     # -------- Label distribution
-    label_pdf = df.groupBy("label").count().toPandas()
+    # label_pdf = df.groupBy("label").count().toPandas()
 
-    plt.figure(figsize=(5, 4))
-    plt.bar(label_pdf["label"], label_pdf["count"])
-    plt.xlabel("Label (0 = Negative, 1 = Positive)")
-    plt.ylabel("Count")
-    plt.title("Label Distribution")
+    # plt.figure(figsize=(5, 4))
+    # plt.bar(label_pdf["label"], label_pdf["count"])
+    # plt.xlabel("Label (0 = Negative, 1 = Positive)")
+    # plt.ylabel("Count")
+    # plt.title("Label Distribution")
 
-    plt.tight_layout()
-    plt.savefig(
-        os.path.join(save_dir, "label_distribution.png"),
-        dpi=300,
-        bbox_inches="tight"
-    )
-    plt.close()
+    # plt.tight_layout()
+    # plt.savefig(
+    #     os.path.join(save_dir, "label_distribution.png"),
+    #     dpi=300,
+    #     bbox_inches="tight"
+    # )
+    # plt.close()
 
     # -------- Confusion Matrix
     cm_pdf = test_pred.select("label", "prediction").toPandas()
